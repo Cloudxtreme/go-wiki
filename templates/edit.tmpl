@@ -1,0 +1,20 @@
+<h1>Editing {{.Title}}</h1>
+
+<form action="/save/{{.Title}}" method="POST">
+<div><textarea id="editor" name="body" rows="20" cols="80"></textarea></div>
+<div><input type="submit" value="Save"></div>
+</form>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>
+
+    var simplemde = new SimpleMDE( {
+        element: document.getElementById('editor'),
+        forceSync: true,
+        autofocus: true,
+        toolbar: false
+    } )
+    simplemde.value("{{printf "%s" .Body}}")
+
+</script>
