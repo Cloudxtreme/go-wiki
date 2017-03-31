@@ -3,6 +3,7 @@ package main
 import(
     "io/ioutil"
     "net/http"
+    "html/template"
 
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/russross/blackfriday"
@@ -63,6 +64,9 @@ func main() {
     router := gin.Default()
     router.LoadHTMLGlob("./templates/*")
     router.Static("/assets", "./assets")
+
+    html := template.Must(template.ParseFiles("./templates/edit.tmpl", "./templates/view.tmpl"))
+    router.SetHTMLTemplate(html)
 
     router.GET("/view/:title", ViewHandler)
     router.GET("/edit/:title", EditHandler)
