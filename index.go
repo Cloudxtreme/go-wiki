@@ -41,7 +41,7 @@ func ViewHandler(c *gin.Context)  {
     title := c.Param("title")
     p, _ := LoadPage(title)
     p.Body = blackfriday.MarkdownBasic(p.Body)
-    c.HTML(http.StatusOK, "view.tmpl", gin.H{"Title": p.Title, "Body": p.Body})
+    c.HTML(http.StatusOK, "view.tmpl", gin.H{"Title": p.Title, "Body": template.HTML(p.Body)})
 }
 func EditHandler(c *gin.Context)  {
     title := c.Param("title")
