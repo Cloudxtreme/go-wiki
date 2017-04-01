@@ -7,7 +7,7 @@ import(
 
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/russross/blackfriday"
-    // "github.com/microcosm-cc/bluemonday"
+    "github.com/microcosm-cc/bluemonday"
 )
 
 // ----------
@@ -35,12 +35,20 @@ func LoadPage(title string) (*Page, error) {
 }
 
 // ----------
+// Utily funcs
+// ----------
+
+
+// ----------
 // Handler for different routes
 // ----------
 func ViewHandler(c *gin.Context)  {
     title := c.Param("title")
-    p, _ := LoadPage(title)
-    p.Body = blackfriday.MarkdownBasic(p.Body)
+    p, err := LoadPage(title)
+    if err != nil {
+      c.Redirect(http.StatusFound, "/edit/" + title)
+    }
+    p.Body = bluemonday.UGCPolicy().SanitizeBytes(blackfriday.MarkdownBasic(p.Body))
     c.HTML(http.StatusOK, "view.tmpl", gin.H{"Title": p.Title, "Body": template.HTML(p.Body)})
 }
 func EditHandler(c *gin.Context)  {
@@ -56,8 +64,20 @@ func SaveHandler(c *gin.Context)  {
     title := c.Param("title")
     body := c.PostForm("body")
     p := &Page{Title: title, Body: []byte(body)}
-    p.Save()
+    err := p.Save()
+    if err != nil {
+      // TODO: throw internal server error
+      return
+    }
     c.Redirect(http.StatusFound, "/view/" + title)
+}
+
+func HomeHandler(c *gin.Context) {
+    c.Redirect(http.StatusFound, "/view/index")
+}
+
+func UploadHandler(c *gin.Context)  {
+
 }
 
 func main() {
@@ -68,9 +88,11 @@ func main() {
     html := template.Must(template.ParseFiles("./templates/edit.tmpl", "./templates/view.tmpl"))
     router.SetHTMLTemplate(html)
 
+    router.GET("/", HomeHandler)
     router.GET("/view/:title", ViewHandler)
     router.GET("/edit/:title", EditHandler)
     router.POST("/save/:title", SaveHandler)
+    router.POST("/upload/:title", UploadHandler)
 
     router.Run()
 }
