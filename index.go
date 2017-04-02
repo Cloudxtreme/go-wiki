@@ -4,6 +4,7 @@ import(
     "io/ioutil"
     "net/http"
     "html/template"
+    "time"
 
     "gopkg.in/gin-gonic/gin.v1"
     "github.com/russross/blackfriday"
@@ -77,6 +78,18 @@ func HomeHandler(c *gin.Context) {
 }
 
 func UploadHandler(c *gin.Context)  {
+    file, header, err := c.Request.FormFile("upload")
+    filename := header.Filename
+    fmt.Println(header.Filename)
+    out, err := os.Create("./uploads/" + filename + ".png")
+    if err != nil {
+      panic(err)
+    }
+    defer out.Close()
+    _, err = io.Copy(out, file)
+    if err != nil {
+      panic(err)
+    }
 
 }
 
